@@ -1,0 +1,23 @@
+Jul 23 00:43:53 lihuan-jetson cam_plate: OCR output:
+Jul 23 00:43:57 lihuan-jetson cam_plate: message repeated 5 times: [ OCR output:]
+Jul 23 00:44:01 lihuan-jetson cam_plate: OCR output: |
+Jul 23 00:44:03 lihuan-jetson cam_plate: OCR output:
+Jul 23 00:44:18 lihuan-jetson cam_plate: message repeated 4 times: [ OCR output:]
+Jul 23 00:44:24 lihuan-jetson cam_plate: OCR output: FE NGO Br eR eT TR#012Cr AADOM BE pat Tae SO
+Jul 23 00:44:25 lihuan-jetson cam_plate: OCR output: FE NGO Br eR eT TR#012Cr AADOM BE pat Tae SO
+Jul 23 00:44:26 lihuan-jetson cam_plate: OCR output: 7
+Jul 23 00:44:27 lihuan-jetson cam_plate: OCR output: er#012J
+Jul 23 00:44:29 lihuan-jetson cam_plate: OCR output: i
+Jul 23 00:44:33 lihuan-jetson cam_plate: message repeated 5 times: [ OCR output: i]
+Jul 23 00:44:34 lihuan-jetson cam_plate: OCR output: AR
+Jul 23 00:44:43 lihuan-jetson cam_plate: OCR output:
+Jul 23 00:44:53 lihuan-jetson cam_plate: OCR output: CUU-KOB
+Jul 23 00:45:10 lihuan-jetson cam_plate: OCR output: CUU-KOB
+Jul 23 00:45:10 lihuan-jetson cam_plate: OCR output: CUU:KOB
+Jul 23 00:45:12 lihuan-jetson cam_plate: OCR output: CUU-KOG
+Jul 23 00:45:17 lihuan-jetson cam_plate: OCR output: CUU-K06
+Jul 23 00:45:21 lihuan-jetson cam_plate: OCR output: CUU-KO6
+Jul 23 00:45:21 lihuan-jetson cam_plate: OCR output:
+Jul 23 00:45:24 lihuan-jetson cam_plate: message repeated 4 times: [ OCR output:]
+Jul 23 00:45:25 lihuan-jetson cam_plate: OCR output: {
+Jul 23 00:45:26 lihuan-jetson cam_plate: OCR output:

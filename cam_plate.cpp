@@ -1,7 +1,7 @@
 /***************************************************************************************
- * @file    license_plate.cpp
- * @brief   Process a single image to detect and extract license plate. And then uses
- *          Tesseract OCR engine for character recognition.
+ * @file    cam_plate.cpp
+ * @brief   Process pre-recorded video to detect and extract license plate. And then 
+ *          use Tesseract OCR engine for character recognition.
  *
  * @author        <Li-Huan Lu>
  * @date          <07/22/2025>
@@ -15,9 +15,11 @@
 //#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
 #include <opencv2/opencv.hpp>
 #include <algorithm>  // for std::sort
 #include <vector>
+#include <syslog.h>
 
 #include <tesseract/baseapi.h>
 #include <leptonica/allheaders.h>
@@ -27,19 +29,26 @@ using namespace cv;
 
 #define SYSTEM_ERROR (-1)
 #define ESCAPE_KEY   (27)
+#define FONT         FONT_HERSHEY_SIMPLEX
 
 /**********************************************************************************
  * Public variable     
  **********************************************************************************/
-Mat src, src_gray;
+Mat src, src_gray, src_contour;
 Mat blackhat, grad_thresh, light;
 Mat grad_x, abs_grad_x, norm_grad_x;
 
 vector<vector<Point>> contours;
 
 const char* window_name1 = "Source";
-const char* window_name2 = "Result";
-const char* filename;
+const char* window_name2 = "Cropped";
+const char* window_name3 = "Contours";
+
+string outText; // OCR result string
+
+char plate_file[32];
+char contour_file[32];
+unsigned int frame_count = 0;
 
 /**********************************************************************************
  * Translated from Python to C++ by ChatGPT
@@ -97,7 +106,9 @@ void pruneLicensePlateCandidates(const Mat& gray, const vector<vector<Point>>& c
             Mat thresh;
             threshold(cropped, thresh, 0, 255, THRESH_BINARY | THRESH_OTSU);
             imshow(window_name2, thresh);
-			imwrite("plate_result.jpg", thresh);
+			
+			sprintf(plate_file, "plate_result%04d.jpg", frame_count);
+			imwrite(plate_file, thresh);
 			
             // Store the rotated rect (candidate)
             candidates.push_back(rr);
@@ -121,9 +132,8 @@ void pruneLicensePlateCandidates(const Mat& gray, const vector<vector<Point>>& c
  * 
  * @return     None           
  **********************************************************************************/
-void ocr_process(const char* str)
+string ocr_process(const char* str)
 {
-    char *outText;
 	
 	tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
     // Initialize tesseract-ocr with English, without specifying tessdata path
@@ -135,15 +145,19 @@ void ocr_process(const char* str)
     // Open input image with leptonica library
     Pix *image = pixRead(str);
     api->SetImage(image);
+	api->SetSourceResolution(300); // To remove the DPI warning
     // Get OCR result
-    outText = api->GetUTF8Text();
-    printf("OCR output:\n%s", outText);
+    char* rawText = api->GetUTF8Text();
+    //printf("OCR output:\n%s", outText);
 
     // Destroy used object and release memory
     api->End();
     delete api;
-    delete [] outText;
+	string result(rawText);
+    delete [] rawText;	
     pixDestroy(&image);	
+	
+	return result;
 }
 
 /**********************************************************************************
@@ -219,10 +233,11 @@ void preprocess()
         contours.resize(keep);
 	
 	// Draw the N contours on original image
+	src_contour = src.clone();
 	for(int i = 0; i < contours.size(); i++ ){
-        drawContours(src, contours, i, Scalar(0,255,0), 2, LINE_8, hierarchy, 0);
+        drawContours(src_contour, contours, i, Scalar(0,255,0), 2, LINE_8, hierarchy, 0);
     }
-	
+		
 }
 
 /**********************************************************************************
@@ -230,52 +245,81 @@ void preprocess()
  **********************************************************************************/
 int main( int argc, char** argv )
 {
+    const char* default_file = "plate_vid.mp4";
+	const char* filename;
+	VideoCapture cap;
+	string new_ocr;
+	string prev_ocr;
+	unsigned int ocr_cnt = 0;
+	Point pt1(10, 40);
+	char frame_text[128] = "OCR: ";
 	
-	if(argc < 2)
-    {
-       printf("Usage: %s <Input image>\n", argv[0]);
-       return SYSTEM_ERROR;
+	if (argc == 2){
+        filename = argv[1];
+		cap.open(filename);
     }
-    else{
-		filename = argv[1];
+	else{
+	    filename = default_file;
+		cap.open(filename);
 	}
 	
-	src = imread(filename, IMREAD_COLOR); // Load an image
-	
-    if(src.empty()){
-        printf("Could not open or find the image!\n");
-        return SYSTEM_ERROR;
+    // Check if file is loaded fine
+    if(!cap.isOpened()){
+        printf(" Error opening file or device\n");
+        printf("Usage: ./cam_plate (using default video)\n");
+	    printf("Usage: ./cam_plate ""video_name.mp4""\n");
+        exit(SYSTEM_ERROR);
     }
-    
-    // Pre-processing pipeline	
-    preprocess();
 	
-	// Contour selection
-	vector<RotatedRect> candidatePlates;
-	pruneLicensePlateCandidates(src_gray, contours, candidatePlates);
+    while(1)
+    {
+		cap.read(src);
+		
+		if (src.empty()){
+			printf("Video ended.\n");
+			break; // check if at end
+        }
+		
+		frame_count++;
+		
+	    // Pre-processing pipeline	
+        preprocess();
 	
-	// Store some results during the pre-processing for inspection
-	imwrite("blackhat.jpg", blackhat);
-	imwrite("light_region.jpg", light);
-	imwrite("norm_grad_x.jpg", norm_grad_x);
-	imwrite("grad_thresh.jpg", grad_thresh);
-    
-	// Send the cropped image to Tesseract OCR
-	ocr_process("plate_result.jpg");
-    
-	// Temporary result display
-    while(1){
-        imshow(window_name1, src);
-		//imshow("BLACK HAT", blackhat);
-		imshow("Light Regions", light);
-		//imshow("Scharr", norm_grad_x);
-		//imshow("Grad Erode/Dilate", grad_thresh);
-		imshow("Final", grad_thresh);
+	    // Contour selection
+	    vector<RotatedRect> candidatePlates;
+	    pruneLicensePlateCandidates(src_gray, contours, candidatePlates);
+	    
+		// Send the cropped image to Tesseract OCR
+	    new_ocr = ocr_process(plate_file);
+		
+		//if (strcmp(new_ocr, prev_ocr) == 0)
+		if (new_ocr == prev_ocr)
+		    ocr_cnt++;		
+		
+		if (ocr_cnt == 1){
+			//printf("OCR output:\n%s", new_ocr.c_str());
+			syslog(LOG_INFO, "OCR output: %s", new_ocr.c_str());
+			sprintf(frame_text, "OCR: %s", new_ocr.c_str());
+		    putText(src_contour, frame_text, pt1, FONT, 1, Scalar(0,0,255), 2, LINE_8, false);
+			ocr_cnt = 0;
+		}
+		else{
+			putText(src_contour, "OCR:", pt1, FONT, 1, Scalar(0,0,255), 2, LINE_8, false);
+		}
+		
+		prev_ocr = new_ocr;		
+		
+		sprintf(contour_file, "contour_result%04d.ppm", frame_count);
+	    imwrite(contour_file, src_contour);
+	
+	    imshow(window_name1, src);
+		imshow(window_name3, src_contour);
 		
 	    char ch;
-        if (ch = waitKey(10) == ESCAPE_KEY) break;
+        if (ch = waitKey(1) == ESCAPE_KEY) break;
     }
-  
+	
     destroyAllWindows();
+	
     return 0;
 }
