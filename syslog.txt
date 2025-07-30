@@ -1,23 +1,332 @@
-Jul 23 00:43:53 lihuan-jetson cam_plate: OCR output:
-Jul 23 00:43:57 lihuan-jetson cam_plate: message repeated 5 times: [ OCR output:]
-Jul 23 00:44:01 lihuan-jetson cam_plate: OCR output: |
-Jul 23 00:44:03 lihuan-jetson cam_plate: OCR output:
-Jul 23 00:44:18 lihuan-jetson cam_plate: message repeated 4 times: [ OCR output:]
-Jul 23 00:44:24 lihuan-jetson cam_plate: OCR output: FE NGO Br eR eT TR#012Cr AADOM BE pat Tae SO
-Jul 23 00:44:25 lihuan-jetson cam_plate: OCR output: FE NGO Br eR eT TR#012Cr AADOM BE pat Tae SO
-Jul 23 00:44:26 lihuan-jetson cam_plate: OCR output: 7
-Jul 23 00:44:27 lihuan-jetson cam_plate: OCR output: er#012J
-Jul 23 00:44:29 lihuan-jetson cam_plate: OCR output: i
-Jul 23 00:44:33 lihuan-jetson cam_plate: message repeated 5 times: [ OCR output: i]
-Jul 23 00:44:34 lihuan-jetson cam_plate: OCR output: AR
-Jul 23 00:44:43 lihuan-jetson cam_plate: OCR output:
-Jul 23 00:44:53 lihuan-jetson cam_plate: OCR output: CUU-KOB
-Jul 23 00:45:10 lihuan-jetson cam_plate: OCR output: CUU-KOB
-Jul 23 00:45:10 lihuan-jetson cam_plate: OCR output: CUU:KOB
-Jul 23 00:45:12 lihuan-jetson cam_plate: OCR output: CUU-KOG
-Jul 23 00:45:17 lihuan-jetson cam_plate: OCR output: CUU-K06
-Jul 23 00:45:21 lihuan-jetson cam_plate: OCR output: CUU-KO6
-Jul 23 00:45:21 lihuan-jetson cam_plate: OCR output:
-Jul 23 00:45:24 lihuan-jetson cam_plate: message repeated 4 times: [ OCR output:]
-Jul 23 00:45:25 lihuan-jetson cam_plate: OCR output: {
-Jul 23 00:45:26 lihuan-jetson cam_plate: OCR output:
+Jul 30 01:14:16 lihuan-jetson cam_plate: OCR output:  at frame 1
+Jul 30 01:14:16 lihuan-jetson cam_plate: Frame 1 FPS = 2.5
+Jul 30 01:14:17 lihuan-jetson cam_plate: Frame 2 FPS = 30.7
+Jul 30 01:14:17 lihuan-jetson cam_plate: Frame 3 FPS = 41.4
+Jul 30 01:14:17 lihuan-jetson cam_plate: OCR output:  at frame 4
+Jul 30 01:14:17 lihuan-jetson cam_plate: Frame 4 FPS = 2.8
+Jul 30 01:14:17 lihuan-jetson cam_plate: Frame 5 FPS = 41.7
+Jul 30 01:14:17 lihuan-jetson cam_plate: OCR output:  at frame 6
+Jul 30 01:14:17 lihuan-jetson cam_plate: Frame 6 FPS = 2.7
+Jul 30 01:14:18 lihuan-jetson cam_plate: OCR output:  at frame 7
+Jul 30 01:14:18 lihuan-jetson cam_plate: Frame 7 FPS = 2.8
+Jul 30 01:14:18 lihuan-jetson cam_plate: Frame 8 FPS = 41.2
+Jul 30 01:14:18 lihuan-jetson cam_plate: Frame 9 FPS = 40.9
+Jul 30 01:14:18 lihuan-jetson cam_plate: OCR output:  at frame 10
+Jul 30 01:14:18 lihuan-jetson cam_plate: Frame 10 FPS = 2.5
+Jul 30 01:14:19 lihuan-jetson cam_plate: OCR output:  at frame 11
+Jul 30 01:14:19 lihuan-jetson cam_plate: Frame 11 FPS = 2.7
+Jul 30 01:14:19 lihuan-jetson cam_plate: Frame 12 FPS = 41.0
+Jul 30 01:14:19 lihuan-jetson cam_plate: Frame 13 FPS = 29.2
+Jul 30 01:14:20 lihuan-jetson cam_plate: OCR output:  at frame 14
+Jul 30 01:14:20 lihuan-jetson cam_plate: Frame 14 FPS = 2.5
+Jul 30 01:14:20 lihuan-jetson cam_plate: Frame 15 FPS = 40.8
+Jul 30 01:14:21 lihuan-jetson cam_plate: OCR output:  at frame 16
+Jul 30 01:14:21 lihuan-jetson cam_plate: Frame 16 FPS = 2.7
+Jul 30 01:14:21 lihuan-jetson cam_plate: Frame 17 FPS = 41.6
+Jul 30 01:14:21 lihuan-jetson cam_plate: OCR output:  at frame 18
+Jul 30 01:14:21 lihuan-jetson cam_plate: Frame 18 FPS = 2.6
+Jul 30 01:14:22 lihuan-jetson cam_plate: OCR output:  at frame 19
+Jul 30 01:14:22 lihuan-jetson cam_plate: Frame 19 FPS = 2.7
+Jul 30 01:14:22 lihuan-jetson cam_plate: Frame 20 FPS = 41.1
+Jul 30 01:14:22 lihuan-jetson cam_plate: Frame 21 FPS = 40.2
+Jul 30 01:14:22 lihuan-jetson cam_plate: Frame 22 FPS = 27.8
+Jul 30 01:14:23 lihuan-jetson cam_plate: Frame 23 FPS = 39.8
+Jul 30 01:14:23 lihuan-jetson cam_plate: Frame 24 FPS = 40.7
+Jul 30 01:14:24 lihuan-jetson cam_plate: Frame 25 FPS = 40.3
+Jul 30 01:14:24 lihuan-jetson cam_plate: Frame 26 FPS = 27.1
+Jul 30 01:14:24 lihuan-jetson cam_plate: Frame 27 FPS = 40.1
+Jul 30 01:14:25 lihuan-jetson cam_plate: Frame 28 FPS = 39.9
+Jul 30 01:14:25 lihuan-jetson cam_plate: Frame 29 FPS = 41.2
+Jul 30 01:14:25 lihuan-jetson cam_plate: Frame 30 FPS = 28.5
+Jul 30 01:14:26 lihuan-jetson cam_plate: Frame 31 FPS = 40.0
+Jul 30 01:14:26 lihuan-jetson cam_plate: Frame 32 FPS = 39.0
+Jul 30 01:14:27 lihuan-jetson cam_plate: Frame 33 FPS = 40.8
+Jul 30 01:14:27 lihuan-jetson cam_plate: Frame 34 FPS = 29.5
+Jul 30 01:14:27 lihuan-jetson cam_plate: Frame 35 FPS = 39.9
+Jul 30 01:14:28 lihuan-jetson cam_plate: Frame 36 FPS = 39.8
+Jul 30 01:14:28 lihuan-jetson cam_plate: Frame 37 FPS = 40.5
+Jul 30 01:14:28 lihuan-jetson cam_plate: Frame 38 FPS = 26.5
+Jul 30 01:14:29 lihuan-jetson cam_plate: Frame 39 FPS = 39.5
+Jul 30 01:14:29 lihuan-jetson cam_plate: Frame 40 FPS = 38.4
+Jul 30 01:14:29 lihuan-jetson cam_plate: Frame 41 FPS = 28.3
+Jul 30 01:14:30 lihuan-jetson cam_plate: Frame 42 FPS = 28.3
+Jul 30 01:14:30 lihuan-jetson cam_plate: Frame 43 FPS = 38.2
+Jul 30 01:14:30 lihuan-jetson cam_plate: Frame 44 FPS = 39.2
+Jul 30 01:14:31 lihuan-jetson cam_plate: Frame 45 FPS = 28.6
+Jul 30 01:14:31 lihuan-jetson cam_plate: Frame 46 FPS = 28.4
+Jul 30 01:14:31 lihuan-jetson cam_plate: Frame 47 FPS = 39.1
+Jul 30 01:14:32 lihuan-jetson cam_plate: Frame 48 FPS = 38.8
+Jul 30 01:14:32 lihuan-jetson cam_plate: Frame 49 FPS = 27.3
+Jul 30 01:14:32 lihuan-jetson cam_plate: Frame 50 FPS = 28.3
+Jul 30 01:14:34 lihuan-jetson cam_plate: OCR output: ps eres#012orice seater#012Pere eee#012 at frame 51
+Jul 30 01:14:34 lihuan-jetson cam_plate: Frame 51 FPS = 1.1
+Jul 30 01:14:34 lihuan-jetson cam_plate: Frame 52 FPS = 40.4
+Jul 30 01:14:34 lihuan-jetson cam_plate: Frame 53 FPS = 40.3
+Jul 30 01:14:34 lihuan-jetson cam_plate: Frame 54 FPS = 40.7
+Jul 30 01:14:34 lihuan-jetson cam_plate: Frame 55 FPS = 40.7
+Jul 30 01:14:34 lihuan-jetson cam_plate: Frame 56 FPS = 39.8
+Jul 30 01:14:35 lihuan-jetson cam_plate: Frame 57 FPS = 40.5
+Jul 30 01:14:35 lihuan-jetson cam_plate: Frame 58 FPS = 28.7
+Jul 30 01:14:35 lihuan-jetson cam_plate: Frame 59 FPS = 40.4
+Jul 30 01:14:36 lihuan-jetson cam_plate: Frame 60 FPS = 39.4
+Jul 30 01:14:36 lihuan-jetson cam_plate: Frame 61 FPS = 41.1
+Jul 30 01:14:36 lihuan-jetson cam_plate: Frame 62 FPS = 28.6
+Jul 30 01:14:37 lihuan-jetson cam_plate: Frame 63 FPS = 39.0
+Jul 30 01:14:37 lihuan-jetson cam_plate: Frame 64 FPS = 40.8
+Jul 30 01:14:37 lihuan-jetson cam_plate: Frame 65 FPS = 40.3
+Jul 30 01:14:39 lihuan-jetson cam_plate: OCR output: UU KOE:#012 at frame 66
+Jul 30 01:14:39 lihuan-jetson cam_plate: Frame 66 FPS = 1.0
+Jul 30 01:14:39 lihuan-jetson cam_plate: OCR output: CH KO8#012 at frame 67
+Jul 30 01:14:39 lihuan-jetson cam_plate: Frame 67 FPS = 2.4
+Jul 30 01:14:39 lihuan-jetson cam_plate: OCR output: CU KOB#012 at frame 68
+Jul 30 01:14:39 lihuan-jetson cam_plate: Frame 68 FPS = 2.5
+Jul 30 01:14:40 lihuan-jetson cam_plate: OCR output: UU KO8:#012 at frame 69
+Jul 30 01:14:40 lihuan-jetson cam_plate: Frame 69 FPS = 2.5
+Jul 30 01:14:40 lihuan-jetson cam_plate: OCR output: EWU KO"#012 at frame 70
+Jul 30 01:14:40 lihuan-jetson cam_plate: Frame 70 FPS = 2.6
+Jul 30 01:14:41 lihuan-jetson cam_plate: OCR output: EU KO8!#012 at frame 71
+Jul 30 01:14:41 lihuan-jetson cam_plate: Frame 71 FPS = 2.5
+Jul 30 01:14:41 lihuan-jetson cam_plate: OCR output: Lub: KOR#012 at frame 72
+Jul 30 01:14:41 lihuan-jetson cam_plate: Frame 72 FPS = 2.5
+Jul 30 01:14:42 lihuan-jetson cam_plate: OCR output: CW KOR#012 at frame 73
+Jul 30 01:14:42 lihuan-jetson cam_plate: Frame 73 FPS = 2.5
+Jul 30 01:14:42 lihuan-jetson cam_plate: OCR output: CU: KOR#012 at frame 74
+Jul 30 01:14:42 lihuan-jetson cam_plate: Frame 74 FPS = 2.5
+Jul 30 01:14:42 lihuan-jetson cam_plate: OCR output: COU KOR#012 at frame 75
+Jul 30 01:14:42 lihuan-jetson cam_plate: Frame 75 FPS = 2.5
+Jul 30 01:14:43 lihuan-jetson cam_plate: OCR output: CU KOS"#012 at frame 76
+Jul 30 01:14:43 lihuan-jetson cam_plate: Frame 76 FPS = 2.6
+Jul 30 01:14:43 lihuan-jetson cam_plate: OCR output: CWU- Kg"#012 at frame 77
+Jul 30 01:14:43 lihuan-jetson cam_plate: Frame 77 FPS = 2.5
+Jul 30 01:14:44 lihuan-jetson cam_plate: OCR output: CUU- KOR#012 at frame 78
+Jul 30 01:14:44 lihuan-jetson cam_plate: Frame 78 FPS = 2.5
+Jul 30 01:14:44 lihuan-jetson cam_plate: OCR output: CUU- Kg!#012 at frame 79
+Jul 30 01:14:44 lihuan-jetson cam_plate: Frame 79 FPS = 2.4
+Jul 30 01:14:45 lihuan-jetson cam_plate: OCR output: CUU- KOR#012 at frame 80
+Jul 30 01:14:45 lihuan-jetson cam_plate: Frame 80 FPS = 2.4
+Jul 30 01:14:45 lihuan-jetson cam_plate: OCR output: EWU KOS#012 at frame 81
+Jul 30 01:14:45 lihuan-jetson cam_plate: Frame 81 FPS = 2.4
+Jul 30 01:14:45 lihuan-jetson cam_plate: OCR output: CUU- KOS:#012 at frame 82
+Jul 30 01:14:45 lihuan-jetson cam_plate: Frame 82 FPS = 2.4
+Jul 30 01:14:46 lihuan-jetson cam_plate: OCR output: CUU- KOE#012 at frame 83
+Jul 30 01:14:46 lihuan-jetson cam_plate: Frame 83 FPS = 2.4
+Jul 30 01:14:46 lihuan-jetson cam_plate: OCR output: CUU-KOG#012 at frame 84
+Jul 30 01:14:46 lihuan-jetson cam_plate: Frame 84 FPS = 2.4
+Jul 30 01:14:47 lihuan-jetson cam_plate: OCR output: CUU-KOB#012 at frame 85
+Jul 30 01:14:47 lihuan-jetson cam_plate: Frame 85 FPS = 2.3
+Jul 30 01:14:47 lihuan-jetson cam_plate: OCR output: CUU-KOE#012 at frame 86
+Jul 30 01:14:47 lihuan-jetson cam_plate: Frame 86 FPS = 2.6
+Jul 30 01:14:48 lihuan-jetson cam_plate: OCR output: CWU-KOB#012 at frame 87
+Jul 30 01:14:48 lihuan-jetson cam_plate: Frame 87 FPS = 2.5
+Jul 30 01:14:48 lihuan-jetson cam_plate: OCR output: CHU KOE#012 at frame 88
+Jul 30 01:14:48 lihuan-jetson cam_plate: Frame 88 FPS = 2.4
+Jul 30 01:14:48 lihuan-jetson cam_plate: OCR output: CUU-KOE#012 at frame 89
+Jul 30 01:14:48 lihuan-jetson cam_plate: Frame 89 FPS = 2.5
+Jul 30 01:14:49 lihuan-jetson cam_plate: OCR output: CUU- KOE#012 at frame 90
+Jul 30 01:14:49 lihuan-jetson cam_plate: Frame 90 FPS = 2.5
+Jul 30 01:14:49 lihuan-jetson cam_plate: OCR output: CU KOK#012 at frame 91
+Jul 30 01:14:49 lihuan-jetson cam_plate: Frame 91 FPS = 2.6
+Jul 30 01:14:50 lihuan-jetson cam_plate: OCR output: CU-KOg#012 at frame 92
+Jul 30 01:14:50 lihuan-jetson cam_plate: Frame 92 FPS = 2.5
+Jul 30 01:14:50 lihuan-jetson cam_plate: OCR output: CUU-KOB#012 at frame 93
+Jul 30 01:14:50 lihuan-jetson cam_plate: Frame 93 FPS = 2.5
+Jul 30 01:14:50 lihuan-jetson cam_plate: OCR output: CUU-KOB#012 at frame 94
+Jul 30 01:14:50 lihuan-jetson cam_plate: Frame 94 FPS = 2.3
+Jul 30 01:14:51 lihuan-jetson cam_plate: OCR output: CUU-KO§#012 at frame 95
+Jul 30 01:14:51 lihuan-jetson cam_plate: Frame 95 FPS = 2.6
+Jul 30 01:14:51 lihuan-jetson cam_plate: OCR output: CUU-KOS#012 at frame 96
+Jul 30 01:14:51 lihuan-jetson cam_plate: Frame 96 FPS = 2.6
+Jul 30 01:14:52 lihuan-jetson cam_plate: OCR output: CUU-KOE#012 at frame 97
+Jul 30 01:14:52 lihuan-jetson cam_plate: Frame 97 FPS = 2.5
+Jul 30 01:14:52 lihuan-jetson cam_plate: OCR output: CU-KOG#012 at frame 98
+Jul 30 01:14:52 lihuan-jetson cam_plate: Frame 98 FPS = 2.4
+Jul 30 01:14:52 lihuan-jetson cam_plate: OCR output: CUU-KOB#012 at frame 99
+Jul 30 01:14:52 lihuan-jetson cam_plate: Frame 99 FPS = 2.5
+Jul 30 01:14:53 lihuan-jetson cam_plate: OCR output: AT UAE#012CUU:KOE#012 at frame 100
+Jul 30 01:14:53 lihuan-jetson cam_plate: Frame 100 FPS = 2.3
+Jul 30 01:14:53 lihuan-jetson cam_plate: OCR output: CUU-KOB#012 at frame 101
+Jul 30 01:14:53 lihuan-jetson cam_plate: Frame 101 FPS = 2.5
+Jul 30 01:14:54 lihuan-jetson cam_plate: OCR output: CUU:KO5#012 at frame 102
+Jul 30 01:14:54 lihuan-jetson cam_plate: Frame 102 FPS = 2.5
+Jul 30 01:14:54 lihuan-jetson cam_plate: OCR output: BB ogre aceasta, il#012CUU-KOE#012 at frame 103
+Jul 30 01:14:54 lihuan-jetson cam_plate: Frame 103 FPS = 2.1
+Jul 30 01:14:55 lihuan-jetson cam_plate: OCR output: CU: KOE#012 at frame 104
+Jul 30 01:14:55 lihuan-jetson cam_plate: Frame 104 FPS = 2.5
+Jul 30 01:14:55 lihuan-jetson cam_plate: OCR output: Bs co gnttin eftatte,#012CU KOE#012 at frame 105
+Jul 30 01:14:55 lihuan-jetson cam_plate: Frame 105 FPS = 2.1
+Jul 30 01:14:56 lihuan-jetson cam_plate: OCR output: CUU-KOG#012 at frame 106
+Jul 30 01:14:56 lihuan-jetson cam_plate: Frame 106 FPS = 2.3
+Jul 30 01:14:56 lihuan-jetson cam_plate: OCR output: CUU-KOB#012 at frame 107
+Jul 30 01:14:56 lihuan-jetson cam_plate: Frame 107 FPS = 2.6
+Jul 30 01:14:56 lihuan-jetson cam_plate: OCR output: CU KOS#012 at frame 108
+Jul 30 01:14:56 lihuan-jetson cam_plate: Frame 108 FPS = 2.5
+Jul 30 01:14:57 lihuan-jetson cam_plate: OCR output: TCUU- KOS#012 at frame 109
+Jul 30 01:14:57 lihuan-jetson cam_plate: Frame 109 FPS = 2.5
+Jul 30 01:14:57 lihuan-jetson cam_plate: OCR output: “CUU-KOg#012 at frame 110
+Jul 30 01:14:57 lihuan-jetson cam_plate: Frame 110 FPS = 2.5
+Jul 30 01:14:57 lihuan-jetson cam_plate: Frame 111 FPS = 35.4
+Jul 30 01:14:57 lihuan-jetson cam_plate: Frame 112 FPS = 34.1
+Jul 30 01:14:58 lihuan-jetson cam_plate: OCR output: CUU-KOB.#012 at frame 113
+Jul 30 01:14:58 lihuan-jetson cam_plate: Frame 113 FPS = 1.4
+Jul 30 01:14:58 lihuan-jetson cam_plate: OCR output: CUU-KOg#012 at frame 114
+Jul 30 01:14:58 lihuan-jetson cam_plate: Frame 114 FPS = 2.6
+Jul 30 01:14:59 lihuan-jetson cam_plate: OCR output: CU: KOg#012 at frame 115
+Jul 30 01:14:59 lihuan-jetson cam_plate: Frame 115 FPS = 2.5
+Jul 30 01:14:59 lihuan-jetson cam_plate: OCR output: ey#012CUU-KOG#012 at frame 116
+Jul 30 01:14:59 lihuan-jetson cam_plate: Frame 116 FPS = 2.2
+Jul 30 01:15:00 lihuan-jetson cam_plate: OCR output: CUU-KOG#012 at frame 117
+Jul 30 01:15:00 lihuan-jetson cam_plate: Frame 117 FPS = 2.5
+Jul 30 01:15:00 lihuan-jetson cam_plate: OCR output: CUU-KO6)#012 at frame 118
+Jul 30 01:15:00 lihuan-jetson cam_plate: Frame 118 FPS = 2.5
+Jul 30 01:15:00 lihuan-jetson cam_plate: OCR output:  at frame 119
+Jul 30 01:15:00 lihuan-jetson cam_plate: Frame 119 FPS = 2.7
+Jul 30 01:15:01 lihuan-jetson cam_plate: OCR output: CUU KOE,#012 at frame 120
+Jul 30 01:15:01 lihuan-jetson cam_plate: Frame 120 FPS = 2.5
+Jul 30 01:15:01 lihuan-jetson cam_plate: OCR output:  at frame 121
+Jul 30 01:15:01 lihuan-jetson cam_plate: Frame 121 FPS = 2.7
+Jul 30 01:15:02 lihuan-jetson cam_plate: OCR output: CUU:KOG#012 at frame 122
+Jul 30 01:15:02 lihuan-jetson cam_plate: Frame 122 FPS = 2.5
+Jul 30 01:15:02 lihuan-jetson cam_plate: OCR output: (CU Kg#012 at frame 123
+Jul 30 01:15:02 lihuan-jetson cam_plate: Frame 123 FPS = 2.5
+Jul 30 01:15:02 lihuan-jetson cam_plate: OCR output: CUU:KOg#012 at frame 124
+Jul 30 01:15:02 lihuan-jetson cam_plate: Frame 124 FPS = 2.5
+Jul 30 01:15:03 lihuan-jetson cam_plate: OCR output: UU: Og)#012 at frame 125
+Jul 30 01:15:03 lihuan-jetson cam_plate: Frame 125 FPS = 2.6
+Jul 30 01:15:03 lihuan-jetson cam_plate: OCR output: CUU-KOB#012 at frame 126
+Jul 30 01:15:03 lihuan-jetson cam_plate: Frame 126 FPS = 2.5
+Jul 30 01:15:04 lihuan-jetson cam_plate: OCR output: (CUU:KOB#012 at frame 127
+Jul 30 01:15:04 lihuan-jetson cam_plate: Frame 127 FPS = 2.4
+Jul 30 01:15:04 lihuan-jetson cam_plate: OCR output: CUU-KOB)#012 at frame 128
+Jul 30 01:15:04 lihuan-jetson cam_plate: Frame 128 FPS = 2.5
+Jul 30 01:15:04 lihuan-jetson cam_plate: OCR output: UU -KOg#012 at frame 129
+Jul 30 01:15:04 lihuan-jetson cam_plate: Frame 129 FPS = 2.5
+Jul 30 01:15:05 lihuan-jetson cam_plate: OCR output: CUU KB#012 at frame 130
+Jul 30 01:15:05 lihuan-jetson cam_plate: Frame 130 FPS = 2.5
+Jul 30 01:15:05 lihuan-jetson cam_plate: OCR output: CUUKO§#012 at frame 131
+Jul 30 01:15:05 lihuan-jetson cam_plate: Frame 131 FPS = 2.5
+Jul 30 01:15:06 lihuan-jetson cam_plate: OCR output: (CW: KOg#012 at frame 132
+Jul 30 01:15:06 lihuan-jetson cam_plate: Frame 132 FPS = 2.4
+Jul 30 01:15:06 lihuan-jetson cam_plate: OCR output: CUUKOg#012 at frame 133
+Jul 30 01:15:06 lihuan-jetson cam_plate: Frame 133 FPS = 2.6
+Jul 30 01:15:07 lihuan-jetson cam_plate: OCR output: CUU:KOg#012 at frame 134
+Jul 30 01:15:07 lihuan-jetson cam_plate: Frame 134 FPS = 2.6
+Jul 30 01:15:07 lihuan-jetson cam_plate: OCR output: (CUU:KO8#012 at frame 135
+Jul 30 01:15:07 lihuan-jetson cam_plate: Frame 135 FPS = 2.5
+Jul 30 01:15:08 lihuan-jetson cam_plate: OCR output: CUU-KOB#012 at frame 136
+Jul 30 01:15:08 lihuan-jetson cam_plate: Frame 136 FPS = 2.5
+Jul 30 01:15:08 lihuan-jetson cam_plate: OCR output: CUU:KOg#012 at frame 137
+Jul 30 01:15:08 lihuan-jetson cam_plate: Frame 137 FPS = 2.6
+Jul 30 01:15:08 lihuan-jetson cam_plate: OCR output: CUU:KOg#012 at frame 138
+Jul 30 01:15:08 lihuan-jetson cam_plate: Frame 138 FPS = 2.5
+Jul 30 01:15:09 lihuan-jetson cam_plate: OCR output: CUU-KO8#012 at frame 139
+Jul 30 01:15:09 lihuan-jetson cam_plate: Frame 139 FPS = 2.5
+Jul 30 01:15:09 lihuan-jetson cam_plate: OCR output: CUU:KOg#012 at frame 140
+Jul 30 01:15:09 lihuan-jetson cam_plate: Frame 140 FPS = 2.5
+Jul 30 01:15:10 lihuan-jetson cam_plate: OCR output: CUUKOB#012 at frame 141
+Jul 30 01:15:10 lihuan-jetson cam_plate: Frame 141 FPS = 2.5
+Jul 30 01:15:10 lihuan-jetson cam_plate: OCR output: CUU:KOB#012 at frame 142
+Jul 30 01:15:10 lihuan-jetson cam_plate: Frame 142 FPS = 2.5
+Jul 30 01:15:10 lihuan-jetson cam_plate: OCR output: CUU:KOB#012 at frame 143
+Jul 30 01:15:10 lihuan-jetson cam_plate: Frame 143 FPS = 2.5
+Jul 30 01:15:11 lihuan-jetson cam_plate: OCR output: CU KO6#012 at frame 144
+Jul 30 01:15:11 lihuan-jetson cam_plate: Frame 144 FPS = 2.5
+Jul 30 01:15:11 lihuan-jetson cam_plate: OCR output: CUU-K08#012 at frame 145
+Jul 30 01:15:11 lihuan-jetson cam_plate: Frame 145 FPS = 2.5
+Jul 30 01:15:12 lihuan-jetson cam_plate: OCR output: CUU:KOg#012 at frame 146
+Jul 30 01:15:12 lihuan-jetson cam_plate: Frame 146 FPS = 2.5
+Jul 30 01:15:12 lihuan-jetson cam_plate: OCR output: CU: KOE)#012 at frame 147
+Jul 30 01:15:12 lihuan-jetson cam_plate: Frame 147 FPS = 2.5
+Jul 30 01:15:12 lihuan-jetson cam_plate: OCR output: CUU:KOg#012 at frame 148
+Jul 30 01:15:12 lihuan-jetson cam_plate: Frame 148 FPS = 2.6
+Jul 30 01:15:13 lihuan-jetson cam_plate: OCR output: CU KOG#012 at frame 149
+Jul 30 01:15:13 lihuan-jetson cam_plate: Frame 149 FPS = 2.3
+Jul 30 01:15:13 lihuan-jetson cam_plate: OCR output: CUU-KO6#012 at frame 150
+Jul 30 01:15:13 lihuan-jetson cam_plate: Frame 150 FPS = 2.5
+Jul 30 01:15:14 lihuan-jetson cam_plate: OCR output: CUU: KOK#012 at frame 151
+Jul 30 01:15:14 lihuan-jetson cam_plate: Frame 151 FPS = 2.5
+Jul 30 01:15:14 lihuan-jetson cam_plate: OCR output: CUU-KOB#012 at frame 152
+Jul 30 01:15:14 lihuan-jetson cam_plate: Frame 152 FPS = 2.5
+Jul 30 01:15:14 lihuan-jetson cam_plate: OCR output: CUU: KOE#012 at frame 153
+Jul 30 01:15:14 lihuan-jetson cam_plate: Frame 153 FPS = 2.6
+Jul 30 01:15:15 lihuan-jetson cam_plate: OCR output: CUU: KOE#012 at frame 154
+Jul 30 01:15:15 lihuan-jetson cam_plate: Frame 154 FPS = 2.5
+Jul 30 01:15:15 lihuan-jetson cam_plate: OCR output: CUU:KOg#012 at frame 155
+Jul 30 01:15:15 lihuan-jetson cam_plate: Frame 155 FPS = 2.5
+Jul 30 01:15:16 lihuan-jetson cam_plate: OCR output: CUU-KO8#012 at frame 156
+Jul 30 01:15:16 lihuan-jetson cam_plate: Frame 156 FPS = 2.5
+Jul 30 01:15:16 lihuan-jetson cam_plate: OCR output: CUU: KO#012 at frame 157
+Jul 30 01:15:16 lihuan-jetson cam_plate: Frame 157 FPS = 2.6
+Jul 30 01:15:16 lihuan-jetson cam_plate: OCR output: CUU-KOE#012 at frame 158
+Jul 30 01:15:16 lihuan-jetson cam_plate: Frame 158 FPS = 2.5
+Jul 30 01:15:17 lihuan-jetson cam_plate: OCR output: CUU: KO#012 at frame 159
+Jul 30 01:15:17 lihuan-jetson cam_plate: Frame 159 FPS = 2.5
+Jul 30 01:15:17 lihuan-jetson cam_plate: OCR output: CUU-KOG#012 at frame 160
+Jul 30 01:15:17 lihuan-jetson cam_plate: Frame 160 FPS = 2.5
+Jul 30 01:15:18 lihuan-jetson cam_plate: OCR output: CUU-K0G#012 at frame 161
+Jul 30 01:15:18 lihuan-jetson cam_plate: Frame 161 FPS = 2.4
+Jul 30 01:15:18 lihuan-jetson cam_plate: OCR output: (UU: KOB#012 at frame 162
+Jul 30 01:15:18 lihuan-jetson cam_plate: Frame 162 FPS = 2.5
+Jul 30 01:15:19 lihuan-jetson cam_plate: OCR output: CUU-KOg#012 at frame 163
+Jul 30 01:15:19 lihuan-jetson cam_plate: Frame 163 FPS = 2.5
+Jul 30 01:15:19 lihuan-jetson cam_plate: Frame 164 FPS = 41.2
+Jul 30 01:15:19 lihuan-jetson cam_plate: Frame 165 FPS = 41.0
+Jul 30 01:15:19 lihuan-jetson cam_plate: Frame 166 FPS = 41.2
+Jul 30 01:15:19 lihuan-jetson cam_plate: Frame 167 FPS = 41.6
+Jul 30 01:15:19 lihuan-jetson cam_plate: Frame 168 FPS = 41.4
+Jul 30 01:15:19 lihuan-jetson cam_plate: Frame 169 FPS = 29.4
+Jul 30 01:15:19 lihuan-jetson cam_plate: Frame 170 FPS = 29.3
+Jul 30 01:15:20 lihuan-jetson cam_plate: Frame 171 FPS = 40.4
+Jul 30 01:15:20 lihuan-jetson cam_plate: Frame 172 FPS = 40.4
+Jul 30 01:15:20 lihuan-jetson cam_plate: Frame 173 FPS = 29.3
+Jul 30 01:15:20 lihuan-jetson cam_plate: Frame 174 FPS = 29.5
+Jul 30 01:15:21 lihuan-jetson cam_plate: Frame 175 FPS = 41.1
+Jul 30 01:15:21 lihuan-jetson cam_plate: OCR output:  at frame 176
+Jul 30 01:15:21 lihuan-jetson cam_plate: Frame 176 FPS = 2.6
+Jul 30 01:15:22 lihuan-jetson cam_plate: OCR output: ey#012 at frame 177
+Jul 30 01:15:22 lihuan-jetson cam_plate: Frame 177 FPS = 1.2
+Jul 30 01:15:23 lihuan-jetson cam_plate: OCR output: &Y#012 at frame 178
+Jul 30 01:15:23 lihuan-jetson cam_plate: Frame 178 FPS = 2.6
+Jul 30 01:15:23 lihuan-jetson cam_plate: OCR output: NA]#012 at frame 179
+Jul 30 01:15:23 lihuan-jetson cam_plate: Frame 179 FPS = 2.5
+Jul 30 01:15:23 lihuan-jetson cam_plate: OCR output: ee#012 at frame 180
+Jul 30 01:15:23 lihuan-jetson cam_plate: Frame 180 FPS = 2.6
+Jul 30 01:15:24 lihuan-jetson cam_plate: OCR output: wee#012 at frame 181
+Jul 30 01:15:24 lihuan-jetson cam_plate: Frame 181 FPS = 2.6
+Jul 30 01:15:24 lihuan-jetson cam_plate: OCR output: A#012 at frame 182
+Jul 30 01:15:24 lihuan-jetson cam_plate: Frame 182 FPS = 2.5
+Jul 30 01:15:25 lihuan-jetson cam_plate: OCR output: wey#012 at frame 183
+Jul 30 01:15:25 lihuan-jetson cam_plate: Frame 183 FPS = 2.6
+Jul 30 01:15:25 lihuan-jetson cam_plate: OCR output: qe#012 at frame 184
+Jul 30 01:15:25 lihuan-jetson cam_plate: Frame 184 FPS = 2.5
+Jul 30 01:15:25 lihuan-jetson cam_plate: OCR output: e&Y#012 at frame 185
+Jul 30 01:15:25 lihuan-jetson cam_plate: Frame 185 FPS = 2.5
+Jul 30 01:15:26 lihuan-jetson cam_plate: OCR output: &#012 at frame 186
+Jul 30 01:15:26 lihuan-jetson cam_plate: Frame 186 FPS = 2.6
+Jul 30 01:15:26 lihuan-jetson cam_plate: OCR output: A]#012 at frame 187
+Jul 30 01:15:26 lihuan-jetson cam_plate: Frame 187 FPS = 2.5
+Jul 30 01:15:27 lihuan-jetson cam_plate: OCR output: Py#012 at frame 188
+Jul 30 01:15:27 lihuan-jetson cam_plate: Frame 188 FPS = 2.5
+Jul 30 01:15:27 lihuan-jetson cam_plate: OCR output: iA#012 at frame 189
+Jul 30 01:15:27 lihuan-jetson cam_plate: Frame 189 FPS = 2.5
+Jul 30 01:15:28 lihuan-jetson cam_plate: OCR output: PY#012 at frame 190
+Jul 30 01:15:28 lihuan-jetson cam_plate: Frame 190 FPS = 2.5
+Jul 30 01:15:28 lihuan-jetson cam_plate: Frame 191 FPS = 41.8
+Jul 30 01:15:28 lihuan-jetson cam_plate: Frame 192 FPS = 41.5
+Jul 30 01:15:28 lihuan-jetson cam_plate: Frame 193 FPS = 41.7
+Jul 30 01:15:28 lihuan-jetson cam_plate: Frame 194 FPS = 41.8
+Jul 30 01:15:28 lihuan-jetson cam_plate: Frame 195 FPS = 30.3
+Jul 30 01:15:29 lihuan-jetson cam_plate: OCR output: wy)#012 at frame 196
+Jul 30 01:15:29 lihuan-jetson cam_plate: Frame 196 FPS = 1.1
+Jul 30 01:15:29 lihuan-jetson cam_plate: OCR output: yy)#012 at frame 197
+Jul 30 01:15:29 lihuan-jetson cam_plate: Frame 197 FPS = 2.4
+Jul 30 01:15:30 lihuan-jetson cam_plate: OCR output: Wey)#012 at frame 198
+Jul 30 01:15:30 lihuan-jetson cam_plate: Frame 198 FPS = 2.5
+Jul 30 01:15:30 lihuan-jetson cam_plate: Frame 199 FPS = 41.7
+Jul 30 01:15:30 lihuan-jetson cam_plate: Frame 200 FPS = 41.9
+Jul 30 01:15:30 lihuan-jetson cam_plate: Frame 201 FPS = 41.7
+Jul 30 01:15:30 lihuan-jetson cam_plate: Frame 202 FPS = 41.1
+Jul 30 01:15:30 lihuan-jetson cam_plate: Frame 203 FPS = 42.0
+Jul 30 01:15:31 lihuan-jetson cam_plate: OCR output: ep#012 at frame 204
+Jul 30 01:15:31 lihuan-jetson cam_plate: Frame 204 FPS = 1.1
+Jul 30 01:15:31 lihuan-jetson cam_plate: Frame 205 FPS = 42.3
+Jul 30 01:15:31 lihuan-jetson cam_plate: Average frame rate: 42.3 fps. Total frames = 205

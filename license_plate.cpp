@@ -34,8 +34,13 @@ using namespace cv;
 Mat src, src_gray;
 Mat blackhat, grad_thresh, light;
 Mat grad_x, abs_grad_x, norm_grad_x;
+Mat plate_cropped, plate_thresh;
+//Testing 
+Mat blackhat1, blackhat2;
 
 vector<vector<Point>> contours;
+
+bool plate_detected = false;
 
 const char* window_name1 = "Source";
 const char* window_name2 = "Result";
@@ -71,41 +76,67 @@ void pruneLicensePlateCandidates(const Mat& gray, const vector<vector<Point>>& c
 
         // Make sure width is the larger side
         float aspectRatio = w > h ? w / h : h / w;
-
+		printf("width = %f, height = %f\n", w, h);
+		printf("AR = %f\n", aspectRatio);
+		
+        // Get bounding box points 
+	    Point2f boxPoints[4];
+        rr.points(boxPoints);
+            
+	    for (int i = 0; i < 4; ++i){
+            line(src, boxPoints[i], boxPoints[(i + 1) % 4], Scalar(0, 0, 255), 2);
+		    printf("points (%f, %f) to (%f, %f)\n",
+                    boxPoints[i].x, boxPoints[i].y,
+                    boxPoints[(i + 1) % 4].x, boxPoints[(i + 1) % 4].y);
+	    }	
+		
         // Check if aspect ratio is within the range of license plate
-        if (aspectRatio >= minAR && aspectRatio <= maxAR){
-            // Get rotated bounding box points
-            Point2f boxPoints[4];
-            rr.points(boxPoints);
-
+        if (aspectRatio >= minAR && aspectRatio <= maxAR){      
             // Crop out the potential plate candidate from the gray image
             Mat M, rotated, cropped;
             float angle = rr.angle;
             Size rect_size = rr.size;
-
+            printf("Angle = %f\n", angle);
             if (rr.angle < -45.0f){
                 angle += 90.0f;
                 swap(rect_size.width, rect_size.height);
             }
-
-            // Rotation matrix and affine warp
-            M = getRotationMatrix2D(rr.center, angle, 1.0);
-            warpAffine(gray, rotated, M, gray.size(), INTER_CUBIC);
-            getRectSubPix(rotated, rect_size, rr.center, cropped);
-
-            // Threshold the cropped region to get binary image
-            Mat thresh;
-            threshold(cropped, thresh, 0, 255, THRESH_BINARY | THRESH_OTSU);
-            imshow(window_name2, thresh);
-			imwrite("plate_result.jpg", thresh);
-			
+            
+			// Check if the center is around the center of the original image
+			if (rr.center.x > src.cols / 3 && rr.center.x < src.cols * 2 / 3){
+                plate_detected = true;
+				
+				// Rotation matrix and affine warp
+                M = getRotationMatrix2D(rr.center, angle, 1.0);
+                warpAffine(gray, rotated, M, gray.size(), INTER_CUBIC);
+                getRectSubPix(rotated, rect_size, rr.center, plate_cropped);
+/*
+                // Threshold the cropped region to get binary image
+                Mat thresh;
+                threshold(cropped, thresh, 0, 255, THRESH_BINARY | THRESH_OTSU);
+                imshow(window_name2, thresh);
+			    imwrite("plate_result.jpg", thresh);*/
+				break;
+			}
+			else{
+				printf("Not a candidate.\n");
+				plate_detected = false;
+			}
             // Store the rotated rect (candidate)
             candidates.push_back(rr);
-
-            // Optionally: you can store the cropped region as well
-            // candidates_images.push_back(cropped);
         }
+
+		printf("\n");
     }
+}
+
+void LicensePlate_postprocess()
+{
+	// Threshold the cropped region to get binary image
+    
+    threshold(plate_cropped, plate_thresh, 0, 255, THRESH_BINARY | THRESH_OTSU);
+    imshow(window_name2, plate_thresh);
+	imwrite("plate_result.jpg", plate_thresh);
 }
 
 /**********************************************************************************
@@ -161,7 +192,8 @@ void preprocess()
 	
 	cvtColor(src, src_gray, COLOR_BGR2GRAY);
 	
-	Mat rectKern = getStructuringElement(MORPH_RECT, Size(13, 5));
+	//Mat rectKern = getStructuringElement(MORPH_RECT, Size(13, 5));
+	Mat rectKern = getStructuringElement(MORPH_RECT, Size(20, 10));
 	//Mat rectKern = getStructuringElement(MORPH_RECT, Size(20, 5));
 	
 	// Highlights the license plate numbers against the rest of the photo
@@ -176,6 +208,7 @@ void preprocess()
 	// Scharr operator (Sobel with ksize = -1)
 	// Scharr( src_gray, grad_x, ddepth, 1, 0, -1, delta, BORDER_DEFAULT );
 	Sobel(blackhat, grad_x, CV_32F, 1, 0, -1);
+	//Sobel(light, grad_x, CV_32F, 1, 0, -1);
 	abs_grad_x = abs(grad_x);                 // Take absolute value
 	minMaxLoc(abs_grad_x, &minVal, &maxVal);  // Normalize
     // Scale to 0-255
@@ -184,6 +217,11 @@ void preprocess()
     // Blur the gradient representation, applying a closing
     GaussianBlur(norm_grad_x, norm_grad_x, Size(5, 5), 0, 0);
 	morphologyEx(norm_grad_x, norm_grad_x, MORPH_CLOSE, squareKern);
+	
+	//test
+	//Mat crossKern = getStructuringElement(MORPH_CROSS, Size(3, 3));
+	//dilate(norm_grad_x, norm_grad_x, crossKern, Point(-1, -1), 2);
+	//
 	threshold(norm_grad_x, grad_thresh, 0, 255, THRESH_BINARY | THRESH_OTSU);
 	
     
@@ -252,7 +290,7 @@ int main( int argc, char** argv )
 	
 	// Contour selection
 	vector<RotatedRect> candidatePlates;
-	pruneLicensePlateCandidates(src_gray, contours, candidatePlates);
+	pruneLicensePlateCandidates(src_gray, contours, candidatePlates, 1.6, 4.0);
 	
 	// Store some results during the pre-processing for inspection
 	imwrite("blackhat.jpg", blackhat);
@@ -261,14 +299,19 @@ int main( int argc, char** argv )
 	imwrite("grad_thresh.jpg", grad_thresh);
     
 	// Send the cropped image to Tesseract OCR
-	ocr_process("plate_result.jpg");
-    
+	if (plate_detected){
+		LicensePlate_postprocess();
+	    ocr_process("plate_result.jpg");
+    }
+	
 	// Temporary result display
     while(1){
         imshow(window_name1, src);
-		//imshow("BLACK HAT", blackhat);
-		imshow("Light Regions", light);
-		//imshow("Scharr", norm_grad_x);
+		imshow("BLACK HAT", blackhat);
+		//imshow("BLACK HAT1", blackhat1);
+		//imshow("BLACK HAT2", blackhat2);
+		//imshow("Light Regions", light);
+		imshow("Scharr", norm_grad_x);
 		//imshow("Grad Erode/Dilate", grad_thresh);
 		imshow("Final", grad_thresh);
 		

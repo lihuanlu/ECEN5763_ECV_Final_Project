@@ -10,16 +10,20 @@
  *                by Adrian Rosebrock
  *                https://tesseract-ocr.github.io/tessdoc/Examples_C++.html 
  ***************************************************************************************/
-#include "opencv2/imgproc.hpp"
-#include "opencv2/highgui.hpp"
+#include <opencv2/imgproc.hpp>
+#include <opencv2/highgui.hpp>
+#include <opencv2/opencv.hpp>
 //#include <iostream>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string>
-#include <opencv2/opencv.hpp>
+
 #include <algorithm>  // for std::sort
 #include <vector>
+
+#include <pthread.h>
 #include <syslog.h>
+#include <time.h>
 
 #include <tesseract/baseapi.h>
 #include <leptonica/allheaders.h>
@@ -31,12 +35,15 @@ using namespace cv;
 #define ESCAPE_KEY   (27)
 #define FONT         FONT_HERSHEY_SIMPLEX
 
+#define MY_CLOCK_TYPE CLOCK_MONOTONIC
+
 /**********************************************************************************
  * Public variable     
  **********************************************************************************/
 Mat src, src_gray, src_contour;
 Mat blackhat, grad_thresh, light;
 Mat grad_x, abs_grad_x, norm_grad_x;
+Mat plate_cropped, plate_thresh;
 
 vector<vector<Point>> contours;
 
@@ -45,10 +52,17 @@ const char* window_name2 = "Cropped";
 const char* window_name3 = "Contours";
 
 string outText; // OCR result string
+bool plate_detected = false;
 
-char plate_file[32];
-char contour_file[32];
+char plate_file[48];
+char contour_file[48];
 unsigned int frame_count = 0;
+
+double frame_start = 0.0, frame_end = 0.0;
+double start_time = 0.0, end_time = 0.0;
+double fps = 0.0, avg_fps = 0.0, total_fps = 0.0;
+double new_fps = 0.0, one_sec_fps = 0.0;
+struct timespec current_time;
 
 /**********************************************************************************
  * Translated from Python to C++ by ChatGPT
@@ -86,9 +100,14 @@ void pruneLicensePlateCandidates(const Mat& gray, const vector<vector<Point>>& c
             // Get rotated bounding box points
             Point2f boxPoints[4];
             rr.points(boxPoints);
-
+            
+			// Draw all contours in yellow
+			for (int i = 0; i < 4; ++i){
+                line(src_contour, boxPoints[i], boxPoints[(i + 1) % 4], Scalar(33, 222, 255), 2);	
+	        }
+				
             // Crop out the potential plate candidate from the gray image
-            Mat M, rotated, cropped;
+            Mat M, rotated;
             float angle = rr.angle;
             Size rect_size = rr.size;
 
@@ -96,27 +115,46 @@ void pruneLicensePlateCandidates(const Mat& gray, const vector<vector<Point>>& c
                 angle += 90.0f;
                 swap(rect_size.width, rect_size.height);
             }
-
-            // Rotation matrix and affine warp
-            M = getRotationMatrix2D(rr.center, angle, 1.0);
-            warpAffine(gray, rotated, M, gray.size(), INTER_CUBIC);
-            getRectSubPix(rotated, rect_size, rr.center, cropped);
-
-            // Threshold the cropped region to get binary image
-            Mat thresh;
-            threshold(cropped, thresh, 0, 255, THRESH_BINARY | THRESH_OTSU);
-            imshow(window_name2, thresh);
+            
+			// Skip those contours that are too big
+			if (rr.size.width > src.cols / 4 || rr.size.height > src.rows / 4){
+				plate_detected = false;
+				continue;				
+			}
 			
-			sprintf(plate_file, "plate_result%04d.jpg", frame_count);
-			imwrite(plate_file, thresh);
+			// Check if the center is around the center of the original image
+			if (rr.center.x > src.cols / 3 && rr.center.x < src.cols * 2 / 3){
+                plate_detected = true;
+				//printf("Candidate found.\n");
+				
+			    for (int i = 0; i < 4; ++i){
+                    line(src_contour, boxPoints[i], boxPoints[(i + 1) % 4], Scalar(0, 0, 255), 2);	
+	            }
+				
+			    // Rotation matrix and affine warp
+                M = getRotationMatrix2D(rr.center, angle, 1.0);
+                warpAffine(gray, rotated, M, gray.size(), INTER_CUBIC);
+                getRectSubPix(rotated, rect_size, rr.center, plate_cropped);
+				
+				// Store the rotated rect (candidate)
+                candidates.push_back(rr);
 			
-            // Store the rotated rect (candidate)
-            candidates.push_back(rr);
-
-            // Optionally: you can store the cropped region as well
-            // candidates_images.push_back(cropped);
+				break;
+		    }
+			else{
+				plate_detected = false;
+			}
+            
         }
     }
+}
+
+void LicensePlate_postprocess()
+{
+	// Threshold the cropped region to get binary image
+    threshold(plate_cropped, plate_thresh, 0, 255, THRESH_BINARY | THRESH_OTSU);
+	sprintf(plate_file, "plate_result/plate_result%04d.jpg", frame_count);
+	imwrite(plate_file, plate_thresh);
 }
 
 /**********************************************************************************
@@ -148,7 +186,6 @@ string ocr_process(const char* str)
 	api->SetSourceResolution(300); // To remove the DPI warning
     // Get OCR result
     char* rawText = api->GetUTF8Text();
-    //printf("OCR output:\n%s", outText);
 
     // Destroy used object and release memory
     api->End();
@@ -175,7 +212,8 @@ void preprocess()
 	
 	cvtColor(src, src_gray, COLOR_BGR2GRAY);
 	
-	Mat rectKern = getStructuringElement(MORPH_RECT, Size(13, 5));
+	//Mat rectKern = getStructuringElement(MORPH_RECT, Size(13, 5));
+	Mat rectKern = getStructuringElement(MORPH_RECT, Size(20, 10));
 	//Mat rectKern = getStructuringElement(MORPH_RECT, Size(20, 5));
 	
 	// Highlights the license plate numbers against the rest of the photo
@@ -251,8 +289,12 @@ int main( int argc, char** argv )
 	string new_ocr;
 	string prev_ocr;
 	unsigned int ocr_cnt = 0;
-	Point pt1(10, 40);
+	unsigned int one_sec_frame_count = 0;
+	double one_sec_counter = 0.0;
+	Point ocr_pt(10, 40);
+	Point fps_pt(10, 440);
 	char frame_text[128] = "OCR: ";
+	char frame_text2[16] = "FPS: ";
 	
 	if (argc == 2){
         filename = argv[1];
@@ -271,54 +313,96 @@ int main( int argc, char** argv )
         exit(SYSTEM_ERROR);
     }
 	
+	cap.set(CAP_PROP_FRAME_WIDTH, 640);
+    cap.set(CAP_PROP_FRAME_HEIGHT, 480);
+	
+	clock_gettime(MY_CLOCK_TYPE, &current_time);
+    start_time = (double)current_time.tv_sec + ((double)current_time.tv_nsec/1000000000.0);
+	printf("Start license plate detection\n");	
+	
     while(1)
     {
+		clock_gettime(MY_CLOCK_TYPE, &current_time);
+        frame_start = (double)current_time.tv_sec + ((double)current_time.tv_nsec/1000000000.0);
+		
 		cap.read(src);
 		
 		if (src.empty()){
-			printf("Video ended.\n");
+			clock_gettime(MY_CLOCK_TYPE, &current_time);
+            end_time = (double)current_time.tv_sec + ((double)current_time.tv_nsec/1000000000.0);
+			//avg_fps = (double)frame_count / (end_time - start_time);
+			avg_fps = total_fps / (double)frame_count;
+			printf("Video ended at %lf.\n", end_time - start_time);
+			printf("Average frame rate: %.1lf fps\n", avg_fps);
+			printf("Total frames = %d\n", frame_count);
+			
+			syslog(LOG_CRIT, "Average frame rate: %.1lf fps. Total frames = %d", fps, frame_count);
 			break; // check if at end
         }
 		
 		frame_count++;
+		one_sec_frame_count++;
 		
 	    // Pre-processing pipeline	
         preprocess();
 	
 	    // Contour selection
 	    vector<RotatedRect> candidatePlates;
-	    pruneLicensePlateCandidates(src_gray, contours, candidatePlates);
+	    pruneLicensePlateCandidates(src_gray, contours, candidatePlates, 1.5, 5.0);
 	    
-		// Send the cropped image to Tesseract OCR
-	    new_ocr = ocr_process(plate_file);
+		if (plate_detected){
+			// Post-processing
+		    LicensePlate_postprocess();
+	        // Send the cropped image to Tesseract OCR
+	        new_ocr = ocr_process(plate_file);
+			syslog(LOG_CRIT, "OCR output: %s at frame %d", new_ocr.c_str(), frame_count);
+			
+			// Count as correct OCR if 2 consecutive results are the same
+		    if (new_ocr == prev_ocr) 
+		        ocr_cnt++;
+			
+			prev_ocr = new_ocr;	
+			plate_detected = false;
+        }		
 		
-		//if (strcmp(new_ocr, prev_ocr) == 0)
-		if (new_ocr == prev_ocr)
-		    ocr_cnt++;		
-		
-		if (ocr_cnt == 1){
-			//printf("OCR output:\n%s", new_ocr.c_str());
-			syslog(LOG_INFO, "OCR output: %s", new_ocr.c_str());
+		if (ocr_cnt == 1 && new_ocr.length() > 3){
+			printf("OCR output:\n%s", new_ocr.c_str());
 			sprintf(frame_text, "OCR: %s", new_ocr.c_str());
-		    putText(src_contour, frame_text, pt1, FONT, 1, Scalar(0,0,255), 2, LINE_8, false);
+		    putText(src_contour, frame_text, ocr_pt, FONT, 0.8, Scalar(0,0,255), 2, LINE_8, false);
 			ocr_cnt = 0;
 		}
 		else{
-			putText(src_contour, "OCR:", pt1, FONT, 1, Scalar(0,0,255), 2, LINE_8, false);
+			putText(src_contour, "OCR:", ocr_pt, FONT, 0.8, Scalar(0,0,255), 2, LINE_8, false);
 		}
+        
+		clock_gettime(MY_CLOCK_TYPE, &current_time);
+        frame_end = (double)current_time.tv_sec + ((double)current_time.tv_nsec/1000000000.0);
+		fps = 1.0 / (frame_end - frame_start);
+		total_fps += fps;
+		one_sec_fps += fps;
+		syslog(LOG_CRIT, "Frame %d FPS = %0.1lf", frame_count, fps);
 		
-		prev_ocr = new_ocr;		
+		// Update fps to show on frame every 1 second
+	    one_sec_counter += (frame_end - frame_start);
+	    if (one_sec_counter >= 1.0){
+	        new_fps = one_sec_fps / (double)one_sec_frame_count;
+            sprintf(frame_text2, "FPS: %.01lf", new_fps);	    
+			one_sec_counter = 0;
+			one_sec_fps = 0;
+	    }
 		
-		sprintf(contour_file, "contour_result%04d.ppm", frame_count);
+		putText(src_contour, frame_text2, fps_pt, FONT, 0.8, Scalar(0,0,255), 2, LINE_8, false);
+		
+		sprintf(contour_file, "contour_result/contour_result%04d.ppm", frame_count);
 	    imwrite(contour_file, src_contour);
 	
-	    imshow(window_name1, src);
 		imshow(window_name3, src_contour);
 		
 	    char ch;
         if (ch = waitKey(1) == ESCAPE_KEY) break;
     }
-	
+		
+	cap.release();
     destroyAllWindows();
 	
     return 0;
