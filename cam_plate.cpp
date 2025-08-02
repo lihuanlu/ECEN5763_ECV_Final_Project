@@ -370,7 +370,9 @@ void *S3_contour_selection(void *threadp)
                     angle += 90.0f;
                     swap(rect_size.width, rect_size.height);
                 }
-            
+				
+                syslog(LOG_CRIT, "Center (%f, %f), AR %f, Width %f, Height %f", rr.center.x, rr.center.y, aspectRatio, (float)rect_size.width, (float)rect_size.height);
+			
 			    // Skip those contours that are too big
 			    if (rr.size.width > src.cols / 4 || rr.size.height > src.rows / 4){
 				    plate_detected = false;

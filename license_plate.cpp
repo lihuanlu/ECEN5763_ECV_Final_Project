@@ -84,7 +84,7 @@ void pruneLicensePlateCandidates(const Mat& gray, const vector<vector<Point>>& c
         rr.points(boxPoints);
             
 	    for (int i = 0; i < 4; ++i){
-            line(src, boxPoints[i], boxPoints[(i + 1) % 4], Scalar(0, 0, 255), 2);
+            line(src, boxPoints[i], boxPoints[(i + 1) % 4], Scalar(33, 222, 255), 2);
 		    printf("points (%f, %f) to (%f, %f)\n",
                     boxPoints[i].x, boxPoints[i].y,
                     boxPoints[(i + 1) % 4].x, boxPoints[(i + 1) % 4].y);
