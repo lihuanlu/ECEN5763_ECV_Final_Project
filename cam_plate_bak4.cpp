@@ -32,16 +32,14 @@
 using namespace std;
 using namespace cv;
 
-#define NUM_THREADS (10)
+#define NUM_THREADS (7)
 #define NUM_CPUS    (4)
 
 #define SYSTEM_ERROR (-1)
 #define ESCAPE_KEY   (27)
 #define FONT         FONT_HERSHEY_SIMPLEX
 #define BUFFER_SIZE  (30)
-#define PLATE_WIDTH  (2000)
-#define PLATE_HEIGHT (1000)
- 
+
 #define MY_CLOCK_TYPE CLOCK_MONOTONIC
 
 /**********************************************************************************
@@ -63,13 +61,11 @@ const char* window_name1 = "Source";
 const char* window_name2 = "Cropped";
 const char* window_name3 = "Contours";
 
-//string outText; // OCR result string
+string outText; // OCR result string
 bool plate_detected = false;
 
 char plate_file[48];
 char contour_file[48];
-char odd_contour_file[48];
-char even_contour_file[48];
 unsigned int frame_count = 0;
 
 double frame_start = 0.0, frame_end = 0.0;
@@ -93,35 +89,15 @@ frame_buffer_t plate_buffer[BUFFER_SIZE];
 int plate_wr_idx = 0;
 int plate_rd_idx = 0;
 
-frame_buffer_t ocr_odd_frame[BUFFER_SIZE];
-frame_buffer_t ocr_odd_plate[BUFFER_SIZE];
-int odd_wr_idx = 0;
-int odd_rd_idx = 0;
-frame_buffer_t ocr_even_frame[BUFFER_SIZE];
-frame_buffer_t ocr_even_plate[BUFFER_SIZE];
-int even_wr_idx = 0;
-int even_rd_idx = 0;
-
-frame_buffer_t ocr_odd_result[10];
-int odd_result_wr_idx = 0;
-int odd_result_rd_idx = 0;
-
-frame_buffer_t ocr_even_result[10];
-int even_result_wr_idx = 0;
-int even_result_rd_idx = 0;
-
 string new_ocr;
 string prev_ocr;
 unsigned int ocr_cnt = 0;
-//unsigned int one_sec_frame_count = 0;
-//double one_sec_counter = 0.0;
+unsigned int one_sec_frame_count = 0;
+double one_sec_counter = 0.0;
 Point ocr_pt(10, 40);
 Point fps_pt(10, 440);
 char frame_text[128] = "OCR: ";
 char frame_text2[16] = "FPS: ";
-
-char ocr_text1[128] = "OCR: ";
-char ocr_text2[128] = "OCR: ";
 
 /**********************************************************************************
  * Thread variable     
@@ -147,7 +123,6 @@ struct sched_param main_param;
 pthread_attr_t main_attr;
 
 sem_t semS1, semS2, semS3, semS4, semS5, semS6, semS7;
-sem_t semBuffer;
 
 /**********************************************************************************
  * @name       S1_frame_read()
@@ -186,7 +161,7 @@ void *S1_frame_read(void *threadp)
 		}
 		
 		frame_count++;
-		//one_sec_frame_count++;
+		one_sec_frame_count++;
 		threadParams->serviceCnt++;
 
 		sem_post(&semS2);
@@ -441,13 +416,23 @@ void *S3_contour_selection(void *threadp)
 			// Start S1 for the next frame.
 			frame_buffer[frame_wr_idx].frame = src_contour.clone();
 			frame_buffer[frame_wr_idx].frame_num = frame_count;
-		    frame_wr_idx = (frame_wr_idx + 1) % BUFFER_SIZE;
-			
+		    
 			clock_gettime(MY_CLOCK_TYPE, &current_time);
             frame_end = (double)current_time.tv_sec*1000.0 + ((double)current_time.tv_nsec/1000000.0) - start_time;
 		    fps = 1000.0 / (frame_end - frame_start);
-			syslog(LOG_CRIT, "Frame %d FPS = %0.1lf", frame_count, fps);
-		    
+		    total_fps += fps;
+		    one_sec_fps += fps;
+		    syslog(LOG_CRIT, "Frame %d FPS = %0.1lf", frame_count, fps);
+		
+		    // Update fps to show on frame every 1 second
+	        one_sec_counter += (frame_end - frame_start);
+	        if (one_sec_counter >= 1.0){
+	            frame_buffer[frame_wr_idx].frame_fps = one_sec_fps / (double)one_sec_frame_count;
+                sprintf(frame_text2, "FPS: %.01lf", frame_buffer[frame_wr_idx].frame_fps);	    
+			    one_sec_counter = 0;
+			    one_sec_fps = 0;
+	        }
+		    frame_wr_idx = (frame_wr_idx + 1) % BUFFER_SIZE;
 			sem_post(&semS1); 	
 		}
 		
@@ -482,16 +467,9 @@ void *S4_post_process(void *threadp)
 	double service_start = 0.0;
 	double service_end = 0.0;
 	threadParams_t *threadParams = (threadParams_t *)threadp;
-	
-	Mat plate_thresh_temp, plate_canny, plate_rotated;
-	double rotate_angle = 0.0, accumulate_angle = 0.0;
-	int line_count = 0;
-	
+
 	threadParams->service_wcet = 0.0;
 	threadParams->serviceCnt = 0;
-	plate_wr_idx = 0;
-	even_wr_idx = 0;
-	odd_wr_idx = 0;
 	
 	while (!video_ended){
 		sem_wait(&semS4);
@@ -503,101 +481,16 @@ void *S4_post_process(void *threadp)
 		
 		threadParams->serviceCnt++;
 		
-		// Resize the plate close to 1000*500
-		if (plate_cropped.cols != 0) {
-            double scale = 1000.0 / plate_cropped.cols;
-            resize(plate_cropped, plate_cropped, Size(), scale, scale);
-        } 
-		else{
-            printf("ERROR: plate_cropped has 0 columns!\n");
-            continue;
-        }
-		
 	    // Resize
-	    //resize(plate_cropped, plate_cropped, Size(plate_cropped.cols*2, plate_cropped.rows*2));
+	    resize(plate_cropped, plate_cropped, Size(plate_cropped.cols*2, plate_cropped.rows*2));
 	    // Threshold the cropped region to get binary image
-        //threshold(plate_cropped, plate_thresh, 0, 255, THRESH_BINARY | THRESH_OTSU);
-		threshold(plate_cropped, plate_thresh_temp, 0, 255, THRESH_BINARY | THRESH_OTSU);
+        threshold(plate_cropped, plate_thresh, 0, 255, THRESH_BINARY | THRESH_OTSU);
 		
-		Canny(plate_thresh_temp, plate_canny, 80, 240, 3);
-		//cvtColor(plate_thresh_temp, plate_thresh, COLOR_GRAY2BGR);
-		
-		// Probabilistic Line Transform
-        vector<Vec4i> linesP; // will hold the results of the detection
-        HoughLinesP(plate_canny, linesP, 1, CV_PI/180, 50, 50, 10 ); // runs the actual detection
-	    
-		// Draw the lines
-		accumulate_angle = 0.0;
-		line_count = 0;
-		
-        for( size_t i = 0; i < linesP.size(); i++ )
-        {
-		    Vec4i l = linesP[i];
-
-            int x1 = l[0], y1 = l[1], x2 = l[2], y2 = l[3];
-
-            // Compute angle in degrees
-            double angle = atan2(y2 - y1, x2 - x1) * 180.0 / CV_PI;
-		    double original_angle = angle;
-            if (angle < 0) angle += 180.0; // Normalize to [0, 180)
- 
-            // Compute length
-            double length = sqrt((x2 - x1)*(x2 - x1) + (y2 - y1)*(y2 - y1));
-
-            // Filter conditions:
-            bool is_horizontal = angle < 20.0 || angle > 160.0;
-            bool is_long = length > 100; // adjust as needed
-            bool near_bottom = (y1 > src.rows * 0.6) && (y2 > src.rows * 0.6);
-
-            if (is_horizontal && is_long && near_bottom) {
-                //line(plate_thresh, Point(x1, y1), Point(x2, y2), Scalar(0, 0, 255), 3, LINE_AA);
-			    //syslog(LOG_CRIT, "Frame %d, i = %ld, Original angle = %lf, Length = %lf\n", frame_count, i , original_angle, length);
-				line_count++;
-				accumulate_angle += original_angle;
-            }
-        }
-	    
-		rotate_angle = accumulate_angle / (double)line_count;
-		syslog(LOG_CRIT, "Frame %d, Angle to rotate = %lf\n", frame_count, rotate_angle);
-		
-		if (rotate_angle > 0.0){
-		    Point2f center(plate_thresh_temp.cols / 2.0f, plate_thresh_temp.rows / 2.0f);
-		    Mat M = getRotationMatrix2D(center, rotate_angle, 1.0);
-            warpAffine(plate_thresh_temp, plate_rotated, M, plate_thresh_temp.size(), INTER_CUBIC);
-		}
-		else{
-			plate_rotated = plate_thresh_temp.clone();
-		}
-		
-		int x = (int)(plate_rotated.cols / 10);
-		int y = (int)(plate_rotated.rows / 4);
-		int w = (int)(plate_rotated.cols * 8 / 10);
-		int h = (int)(plate_rotated.rows / 2);; 
-		Rect crop_box(Point(x, y), Size(w, h));
-		plate_thresh = plate_rotated(crop_box).clone();
-		
-		// write frame to buffer for S7_plate_write
 		plate_buffer[plate_wr_idx].frame = plate_thresh.clone();
 	    plate_buffer[plate_wr_idx].frame_num = frame_count;
 		plate_wr_idx = (plate_wr_idx + 1) % BUFFER_SIZE;
 		
-		//
-		if (frame_count % 2 == 0){ // write to even buffer
-			ocr_even_frame[even_wr_idx].frame = src_contour.clone();
-	        ocr_even_frame[even_wr_idx].frame_num = frame_count;
-			ocr_even_plate[even_wr_idx].frame = plate_thresh.clone();
-	        ocr_even_plate[even_wr_idx].frame_num = frame_count;
-		    even_wr_idx = (even_wr_idx + 1) % BUFFER_SIZE;
-		}
-		else{
-			ocr_odd_frame[odd_wr_idx].frame = src_contour.clone();
-	        ocr_odd_frame[odd_wr_idx].frame_num = frame_count;
-			ocr_odd_plate[odd_wr_idx].frame = plate_thresh.clone();
-	        ocr_odd_plate[odd_wr_idx].frame_num = frame_count;
-		    odd_wr_idx = (odd_wr_idx + 1) % BUFFER_SIZE;
-		}
-		//
-		sem_post(&semS1);
+		sem_post(&semS5);
 		
 		clock_gettime(MY_CLOCK_TYPE, &current_time);
         service_end = (double)current_time.tv_sec*1000.0 + ((double)current_time.tv_nsec/1000000.0) - start_time;
@@ -627,14 +520,13 @@ void *S4_post_process(void *threadp)
  * 
  * @return     None           
  **********************************************************************************/
-void *S5_ocr_odd_process(void *threadp)
+void *S5_ocr_process(void *threadp)
 {
 	double execution_time = 0.0;
 	double service_start = 0.0;
 	double service_end = 0.0;
 	threadParams_t *threadParams = (threadParams_t *)threadp;
-    string outText; // OCR result string
-	
+    
 	tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
     // Initialize tesseract-ocr with English, without specifying tessdata path
     if (api->Init(NULL, "eng")) {
@@ -646,17 +538,13 @@ void *S5_ocr_odd_process(void *threadp)
     api->SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
 
 	threadParams->service_wcet = 0.0;
-	threadParams->serviceCnt = 0;	
+	threadParams->serviceCnt = 0;
+	prev_ocr = outText;	
 	
-	odd_rd_idx = 0;
-	odd_result_wr_idx = 0;
-	
-	while (!video_ended || odd_rd_idx != odd_wr_idx){
+	while (!video_ended){
+		sem_wait(&semS5);
 		
-		if (odd_rd_idx == odd_wr_idx){
-		    usleep(100000);
-			continue;
-		}
+		if (abort_procedure) break;
 		
 		clock_gettime(MY_CLOCK_TYPE, &current_time);
         service_start = (double)current_time.tv_sec*1000.0 + ((double)current_time.tv_nsec/1000000.0) - start_time;
@@ -665,11 +553,11 @@ void *S5_ocr_odd_process(void *threadp)
 
         // Open input image with leptonica library
         // api->SetImage(const unsigned char* imagedata, int width, int height, int bytes_per_pixel, int bytes_per_line);
-	    api->SetImage(ocr_odd_plate[odd_rd_idx].frame.data,  // pointer to the raw pixel data of the OpenCV Mat
-		              ocr_odd_plate[odd_rd_idx].frame.cols, 
-					  ocr_odd_plate[odd_rd_idx].frame.rows, 
-					  1,                                      // bytes per pixel (1 for grayscale)
-					  ocr_odd_plate[odd_rd_idx].frame.step); // number of bytes per row of the image (stride)
+	    api->SetImage(plate_thresh.data,  // pointer to the raw pixel data of the OpenCV Mat
+		              plate_thresh.cols, 
+					  plate_thresh.rows, 
+					  1,                  // bytes per pixel (1 for grayscale)
+					  plate_thresh.step); // number of bytes per row of the image (stride)
 	    api->SetSourceResolution(300); // To avoid the DPI warning
         
 		// Get OCR result
@@ -679,30 +567,53 @@ void *S5_ocr_odd_process(void *threadp)
 		//outText.erase(std::remove(outText.begin(), outText.end(), '\n'), outText.end());
 		if (!outText.empty() && outText.back() == '\n')
             outText.pop_back();
-	    syslog(LOG_CRIT, "OCR output: %s at frame %d", outText.c_str(), ocr_odd_frame[odd_rd_idx].frame_num);
-				
+	    syslog(LOG_CRIT, "OCR output: %s at frame %d", outText.c_str(), frame_count);
+			
+		// Count as correct OCR if 2 consecutive results are the same
+		if (outText == prev_ocr){ 
+		    ocr_cnt++;		    
+			//plate_detected = false;
+        }		
 		
 		//if (ocr_cnt == 1 && outText.length() > 3){
 		if (outText.length() > 3){	
-			printf("Frame %d OCR output: %s\n", ocr_odd_frame[odd_rd_idx].frame_num, outText.c_str());
-			sprintf(ocr_text1, "OCR: %s", outText.c_str());
-		    putText(ocr_odd_frame[odd_rd_idx].frame, ocr_text1, ocr_pt, FONT, 0.8, Scalar(0,0,255), 2, LINE_8, false);
+			printf("OCR output: %s\n", outText.c_str());
+			sprintf(frame_text, "OCR: %s", outText.c_str());
+		    putText(src_contour, frame_text, ocr_pt, FONT, 0.8, Scalar(0,0,255), 2, LINE_8, false);
+			ocr_cnt = 0;
 		}
 		else{
-			putText(ocr_odd_frame[odd_rd_idx].frame, "OCR:", ocr_pt, FONT, 0.8, Scalar(0,0,255), 2, LINE_8, false);
+			putText(src_contour, "OCR:", ocr_pt, FONT, 0.8, Scalar(0,0,255), 2, LINE_8, false);
 		}
+		
+		prev_ocr = outText;	
 		
         // Destroy used object and release memory
         delete [] rawText;	
          
-		// Pass frame to write-back process.
-	    ocr_odd_result[odd_result_wr_idx].frame = ocr_odd_frame[odd_rd_idx].frame.clone();
-	    ocr_odd_result[odd_result_wr_idx].frame_num = ocr_odd_frame[odd_rd_idx].frame_num;
+		// Print FPS and pass the frame to S6.
+        // Start S1 for the next frame.
+	    frame_buffer[frame_wr_idx].frame = src_contour.clone();
+	    frame_buffer[frame_wr_idx].frame_num = frame_count;
 		    
-
-		odd_rd_idx = (odd_rd_idx + 1) % BUFFER_SIZE;
-		odd_result_wr_idx = (odd_result_wr_idx + 1) % 10;
+	    clock_gettime(MY_CLOCK_TYPE, &current_time);
+        frame_end = (double)current_time.tv_sec*1000.0 + ((double)current_time.tv_nsec/1000000.0) - start_time;
+		fps = 1000.0 / (frame_end - frame_start);
+		total_fps += fps;
+		one_sec_fps += fps;
+		syslog(LOG_CRIT, "Frame %d FPS = %0.1lf", frame_count, fps);
 		
+		// Update fps to show on frame every 1 second
+	    one_sec_counter += (frame_end - frame_start);
+	    if (one_sec_counter >= 1.0){
+	        frame_buffer[frame_wr_idx].frame_fps = one_sec_fps / (double)one_sec_frame_count;
+            sprintf(frame_text2, "FPS: %.01lf", frame_buffer[frame_wr_idx].frame_fps);	    
+			one_sec_counter = 0;
+			one_sec_fps = 0;
+	    }
+		frame_wr_idx = (frame_wr_idx + 1) % BUFFER_SIZE;
+			
+		sem_post(&semS1);
 		
         clock_gettime(MY_CLOCK_TYPE, &current_time);
         service_end = (double)current_time.tv_sec*1000.0 + ((double)current_time.tv_nsec/1000000.0) - start_time;
@@ -711,113 +622,17 @@ void *S5_ocr_odd_process(void *threadp)
 		if (execution_time > threadParams->service_wcet) threadParams->service_wcet = execution_time;
 		
 		// Log
-		syslog(LOG_CRIT, "S5_ocr_odd_process on core %d for release %llu starts at %lf msec\n", sched_getcpu(), threadParams->serviceCnt, service_start);
-		syslog(LOG_CRIT, "S5_ocr_odd_process finishes at %lf msec, C5 = %lf msec\n", service_end, execution_time);		
+		syslog(LOG_CRIT, "S5_ocr_process on core %d for release %llu starts at %lf msec\n", sched_getcpu(), threadParams->serviceCnt, service_start);
+		syslog(LOG_CRIT, "S5_ocr_process finishes at %lf msec, C5 = %lf msec\n", service_end, execution_time);		
     }
 	
 	// Destroy used object and release memory
 	api->End();
     delete api;
 		
-	syslog(LOG_CRIT, "S5_ocr_odd_process WCET = %lf msec\n", threadParams->service_wcet);
+	syslog(LOG_CRIT, "S5_ocr_process WCET = %lf msec\n", threadParams->service_wcet);
     pthread_exit((void *)0);
-} // end of S5_ocr_odd_process
-
-void *S8_ocr_even_process(void *threadp)
-{
-	double execution_time = 0.0;
-	double service_start = 0.0;
-	double service_end = 0.0;
-	threadParams_t *threadParams = (threadParams_t *)threadp;
-    string outText; // OCR result string
-	
-	tesseract::TessBaseAPI *api = new tesseract::TessBaseAPI();
-    // Initialize tesseract-ocr with English, without specifying tessdata path
-    if (api->Init(NULL, "eng")) {
-        fprintf(stderr, "Could not initialize tesseract.\n");
-        exit(1);
-    }
-	// Optimization
-	api->SetPageSegMode(tesseract::PSM_SINGLE_LINE);
-    api->SetVariable("tessedit_char_whitelist", "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789");
-
-	threadParams->service_wcet = 0.0;
-	threadParams->serviceCnt = 0;	
-	
-	even_rd_idx = 0;
-	even_result_wr_idx = 0;
-	
-	while (!video_ended || even_rd_idx != even_wr_idx){
-		
-		if (even_rd_idx == even_wr_idx){
-		    usleep(100000);
-			continue;
-		}
-		
-		clock_gettime(MY_CLOCK_TYPE, &current_time);
-        service_start = (double)current_time.tv_sec*1000.0 + ((double)current_time.tv_nsec/1000000.0) - start_time;
-		threadParams->serviceCnt++;
-		
-
-        // Open input image with leptonica library
-        // api->SetImage(const unsigned char* imagedata, int width, int height, int bytes_per_pixel, int bytes_per_line);
-	    api->SetImage(ocr_even_plate[even_rd_idx].frame.data,  // pointer to the raw pixel data of the OpenCV Mat
-		              ocr_even_plate[even_rd_idx].frame.cols, 
-					  ocr_even_plate[even_rd_idx].frame.rows, 
-					  1,                                      // bytes per pixel (1 for grayscale)
-					  ocr_even_plate[even_rd_idx].frame.step); // number of bytes per row of the image (stride)
-	    api->SetSourceResolution(300); // To avoid the DPI warning
-        
-		// Get OCR result
-        char* rawText = api->GetUTF8Text();
-        outText = rawText;
-	    
-		//outText.erase(std::remove(outText.begin(), outText.end(), '\n'), outText.end());
-		if (!outText.empty() && outText.back() == '\n')
-            outText.pop_back();
-	    syslog(LOG_CRIT, "OCR output: %s at frame %d", outText.c_str(), ocr_even_frame[even_rd_idx].frame_num);
-				
-		
-		//if (ocr_cnt == 1 && outText.length() > 3){
-		if (outText.length() > 3){	
-			printf("Frame %d OCR output: %s\n", ocr_even_frame[even_rd_idx].frame_num, outText.c_str());
-			sprintf(ocr_text2, "OCR: %s", outText.c_str());
-		    putText(ocr_even_frame[even_rd_idx].frame, ocr_text2, ocr_pt, FONT, 0.8, Scalar(0,0,255), 2, LINE_8, false);
-		}
-		else{
-			putText(ocr_even_frame[even_rd_idx].frame, "OCR:", ocr_pt, FONT, 0.8, Scalar(0,0,255), 2, LINE_8, false);
-		}
-		
-        // Destroy used object and release memory
-        delete [] rawText;	
-         
-		// Pass frame to write-back process.
-	    ocr_even_result[even_result_wr_idx].frame = ocr_even_frame[even_rd_idx].frame.clone();
-	    ocr_even_result[even_result_wr_idx].frame_num = ocr_even_frame[even_rd_idx].frame_num;
-		    
-
-		even_rd_idx = (even_rd_idx + 1) % BUFFER_SIZE;
-		even_result_wr_idx = (even_result_wr_idx + 1) % 10;
-		
-		
-        clock_gettime(MY_CLOCK_TYPE, &current_time);
-        service_end = (double)current_time.tv_sec*1000.0 + ((double)current_time.tv_nsec/1000000.0) - start_time;
-		execution_time = service_end - service_start;
-		
-		if (execution_time > threadParams->service_wcet) threadParams->service_wcet = execution_time;
-		
-		// Log
-		syslog(LOG_CRIT, "S8_ocr_even_process on core %d for release %llu starts at %lf msec\n", sched_getcpu(), threadParams->serviceCnt, service_start);
-		syslog(LOG_CRIT, "S8_ocr_even_process finishes at %lf msec, C8 = %lf msec\n", service_end, execution_time);		
-    }
-	
-	// Destroy used object and release memory
-	api->End();
-    delete api;
-		
-	syslog(LOG_CRIT, "S8_ocr_even_process WCET = %lf msec\n", threadParams->service_wcet);
-    pthread_exit((void *)0);
-} // end of S8_ocr_even_process
+} // end of S5_ocr_process
 
 /**********************************************************************************
  * @name       S6_frame_write()
@@ -871,94 +686,6 @@ void *S6_frame_write(void *threadp)
 	syslog(LOG_CRIT, "S6_frame_write WCET = %lf msec\n", threadParams->service_wcet);
     pthread_exit((void *)0);
 } // end of S6_frame_write
-
-void *S9_odd_frame_write(void *threadp)
-{
-	double execution_time = 0.0;
-	double service_start = 0.0;
-	double service_end = 0.0;
-	threadParams_t *threadParams = (threadParams_t *)threadp;
-
-	threadParams->service_wcet = 0.0;
-	threadParams->serviceCnt = 0;
-	odd_result_rd_idx = 0;
-	
-	while (!video_ended || odd_result_rd_idx != odd_result_wr_idx){
-		
-		if (odd_result_rd_idx == odd_result_wr_idx){
-		    usleep(100000);
-			continue;
-		}
-		
-		clock_gettime(MY_CLOCK_TYPE, &current_time);
-        service_start = (double)current_time.tv_sec*1000.0 + ((double)current_time.tv_nsec/1000000.0) - start_time;
-		
-		threadParams->serviceCnt++;
-		
-		//putText(src_contour, frame_text2, fps_pt, FONT, 0.8, Scalar(0,0,255), 2, LINE_8, false);
-		
-		sprintf(odd_contour_file, "contour_result/contour_result%04d.ppm", ocr_odd_result[odd_result_rd_idx].frame_num);
-	    imwrite(odd_contour_file, ocr_odd_result[odd_result_rd_idx].frame);	    
-		odd_result_rd_idx = (odd_result_rd_idx + 1) % 10;
-		
-		clock_gettime(MY_CLOCK_TYPE, &current_time);
-        service_end = (double)current_time.tv_sec*1000.0 + ((double)current_time.tv_nsec/1000000.0) - start_time;
-		execution_time = service_end - service_start;
-		
-		if (execution_time > threadParams->service_wcet) threadParams->service_wcet = execution_time;
-		
-		// Log
-		syslog(LOG_CRIT, "S9_odd_frame_write on core %d for release %llu starts at %lf msec\n", sched_getcpu(), threadParams->serviceCnt, service_start);
-		syslog(LOG_CRIT, "S9_odd_frame_write finishes at %lf msec, C9 = %lf msec\n", service_end, execution_time);
-	}
-	
-	syslog(LOG_CRIT, "S9_odd_frame_write WCET = %lf msec\n", threadParams->service_wcet);
-    pthread_exit((void *)0);
-} // end of S9_odd_frame_write
-
-void *S10_even_frame_write(void *threadp)
-{
-	double execution_time = 0.0;
-	double service_start = 0.0;
-	double service_end = 0.0;
-	threadParams_t *threadParams = (threadParams_t *)threadp;
-
-	threadParams->service_wcet = 0.0;
-	threadParams->serviceCnt = 0;
-	even_result_rd_idx = 0;
-	
-	while (!video_ended || even_result_rd_idx != even_result_wr_idx){
-		
-		if (even_result_rd_idx == even_result_wr_idx){
-		    usleep(100000);
-			continue;
-		}
-		
-		clock_gettime(MY_CLOCK_TYPE, &current_time);
-        service_start = (double)current_time.tv_sec*1000.0 + ((double)current_time.tv_nsec/1000000.0) - start_time;
-		
-		threadParams->serviceCnt++;
-		
-		//putText(src_contour, frame_text2, fps_pt, FONT, 0.8, Scalar(0,0,255), 2, LINE_8, false);
-		
-		sprintf(even_contour_file, "contour_result/contour_result%04d.ppm", ocr_even_result[even_result_rd_idx].frame_num);
-	    imwrite(even_contour_file, ocr_even_result[even_result_rd_idx].frame);	    
-		even_result_rd_idx = (even_result_rd_idx + 1) % 10;
-		
-		clock_gettime(MY_CLOCK_TYPE, &current_time);
-        service_end = (double)current_time.tv_sec*1000.0 + ((double)current_time.tv_nsec/1000000.0) - start_time;
-		execution_time = service_end - service_start;
-		
-		if (execution_time > threadParams->service_wcet) threadParams->service_wcet = execution_time;
-		
-		// Log
-		syslog(LOG_CRIT, "S10_even_frame_write on core %d for release %llu starts at %lf msec\n", sched_getcpu(), threadParams->serviceCnt, service_start);
-		syslog(LOG_CRIT, "S10_even_frame_write finishes at %lf msec, C10 = %lf msec\n", service_end, execution_time);
-	}
-	
-	syslog(LOG_CRIT, "S10_even_frame_write WCET = %lf msec\n", threadParams->service_wcet);
-    pthread_exit((void *)0);
-} // end of S10_even_frame_write
 
 /**********************************************************************************
  * @name       S7_plate_write()
@@ -1098,7 +825,6 @@ int main( int argc, char** argv )
     if (sem_init (&semS5, 0, 0)) { printf ("Failed to initialize S5 semaphore\n"); exit (SYSTEM_ERROR); }
 	if (sem_init (&semS6, 0, 0)) { printf ("Failed to initialize S6 semaphore\n"); exit (SYSTEM_ERROR); }
 	if (sem_init (&semS7, 0, 0)) { printf ("Failed to initialize S7 semaphore\n"); exit (SYSTEM_ERROR); }
-	if (sem_init (&semBuffer, 0, 0)) { printf ("Failed to initialize Buffer semaphore\n"); exit (SYSTEM_ERROR); }
 	
 	// set main program parameter
 	mainpid = getpid();
@@ -1132,17 +858,9 @@ int main( int argc, char** argv )
             CPU_ZERO(&threadcpu);
             cpuidx=(2);
             CPU_SET(cpuidx, &threadcpu);
-			//cpuidx=(3);
-            //CPU_SET(cpuidx, &threadcpu);
+			cpuidx=(3);
+            CPU_SET(cpuidx, &threadcpu);
         }
-		else if (i == 7){ // S8 even ocr
-		    cpuidx=(3);
-            CPU_SET(cpuidx, &threadcpu);
-		}
-		else if (i == 8 || i == 9){ // S9 S10 write back
-		    cpuidx=(1);
-            CPU_SET(cpuidx, &threadcpu);
-		}
 
         rc = pthread_attr_init(&rt_sched_attr[i]);
         rc = pthread_attr_setinheritsched(&rt_sched_attr[i], PTHREAD_EXPLICIT_SCHED);
@@ -1186,12 +904,9 @@ int main( int argc, char** argv )
 	else printf("pthread_create successful for S4_post_process\n");
 	
 	// S5_ocr_process
-	rc = pthread_create(&threads[4], &rt_sched_attr[4], S5_ocr_odd_process, (void *)&(threadParams[4]));
-	if(rc < 0) perror("pthread_create for S5_ocr_odd_process");
-	else printf("pthread_create successful for S5_ocr_odd_process\n");
-	rc = pthread_create(&threads[7], &rt_sched_attr[7], S8_ocr_even_process, (void *)&(threadParams[7]));
-	if(rc < 0) perror("pthread_create for S8_ocr_even_process");
-	else printf("pthread_create successful for S8_ocr_even_process\n");
+	rc = pthread_create(&threads[4], &rt_sched_attr[4], S5_ocr_process, (void *)&(threadParams[4]));
+	if(rc < 0) perror("pthread_create for S5_ocr_process");
+	else printf("pthread_create successful for S5_ocr_process\n");
 	
 	// S6_frame_write
     rc = pthread_create(&threads[5], &rt_sched_attr[5], S6_frame_write, (void *)&(threadParams[5]));
@@ -1203,16 +918,6 @@ int main( int argc, char** argv )
 	if(rc < 0) perror("pthread_create for S7_plate_write");
 	else printf("pthread_create successful for S7_plate_write\n");
 	
-	// S9_odd_frame_write
-	rc = pthread_create(&threads[8], &rt_sched_attr[8], S9_odd_frame_write, (void *)&(threadParams[8]));
-	if(rc < 0) perror("pthread_create for S9_odd_frame_write");
-	else printf("pthread_create successful for S9_odd_frame_write\n");
-	
-	// S10_even_frame_write
-	rc = pthread_create(&threads[9], &rt_sched_attr[9], S10_even_frame_write, (void *)&(threadParams[9]));
-	if(rc < 0) perror("pthread_create for S10_even_frame_write");
-	else printf("pthread_create successful for S10_even_frame_write\n");
-	
     for(i=0;i<NUM_THREADS;i++)
     {
         if(rc = pthread_join(threads[i], NULL) < 0)
@@ -1223,8 +928,8 @@ int main( int argc, char** argv )
     
 	clock_gettime(MY_CLOCK_TYPE, &current_time);
     end_time = (double)current_time.tv_sec*1000.0 + ((double)current_time.tv_nsec/1000000.0);
-	avg_fps = (double)frame_count / ((end_time - start_time)/1000.0);
-	//avg_fps = total_fps / (double)frame_count;
+	//avg_fps = (double)frame_count / (end_time - start_time);
+	avg_fps = total_fps / (double)frame_count;
 	printf("Video ended at %lf.\n", (end_time - start_time)/1000.0);
 	printf("Average frame rate: %.1lf fps\n", avg_fps);
 	printf("Total frames = %d\n", frame_count);
